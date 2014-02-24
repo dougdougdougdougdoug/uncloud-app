@@ -1,0 +1,237 @@
+<!DOCTYPE HTML> 
+<html>
+    <head>
+        <title>Uncloud! | A Simple Weather App</title>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+        
+        <style media="screen" type="text/css">
+        	
+body{
+  font-family:Helvetica;
+}
+
+input{
+  font-family:Helvetica;
+  width:300px;
+  height:46px;
+  font-size:24px;
+  margin-top:10px;
+  padding-left:6px;
+  color:#777;
+}
+
+#wrapper{
+  width:400px;
+  margin-left:auto;
+  margin-right:auto;
+  margin-top:80px;
+}
+
+#search{
+  width:400px;
+  height:180px;
+  padding-top:20px;
+  border-radius: 10px;
+  box-shadow: 3px 3px 5px #888;
+  margin:0px;
+  text-align:center;
+  
+/*BG Gradient */  
+background: #7c7c7c; /* Old browsers */
+background: -moz-linear-gradient(top,  #7c7c7c 0%, #000000 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#7c7c7c), color-stop(100%,#000000)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  #7c7c7c 0%,#000000 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  #7c7c7c 0%,#000000 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  #7c7c7c 0%,#000000 100%); /* IE10+ */
+background: linear-gradient(to bottom,  #7c7c7c 0%,#000000 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7c7c7c', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+
+}
+
+#search img{
+	margin-bottom:10px;
+}
+
+#temp2{
+  width:95px;
+  height:95px;
+  border-radius: 10px;
+  box-shadow: 3px 3px 5px #888;
+  margin-top:10px;
+  position:absolute;
+  font-family:Helvetica;
+  color:#FFF;
+  font-weight:bold;
+  font-size:36px;
+  text-align:center;
+ 
+  
+/* BG Gradient */
+background: #ffef16; /* Old browsers */
+background: -moz-linear-gradient(top, #ffef16 0%, #e5a800 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffef16), color-stop(100%,#e5a800)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, #ffef16 0%,#e5a800 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top, #ffef16 0%,#e5a800 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top, #ffef16 0%,#e5a800 100%); /* IE10+ */
+background: linear-gradient(to bottom, #ffef16 0%,#e5a800 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffef16', endColorstr='#e5a800',GradientType=0 ); /* IE6-9 */  
+  
+}
+
+#cond2{
+  width:295px;
+  height:95px;
+  border-radius: 10px;
+  box-shadow: 3px 3px 5px #888;
+  margin-left:105px;
+  margin-top:10px;
+  font-family:Helvetica;
+  color:#FFF;
+  font-weight:bold;
+  font-size:36px;
+  text-align:center;
+  position:absolute;
+
+/* BG Gradient */  
+background: #4a94ef; /* Old browsers */
+background: -moz-linear-gradient(top,  #4a94ef 0%, #2077a3 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4a94ef), color-stop(100%,#2077a3)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  #4a94ef 0%,#2077a3 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  #4a94ef 0%,#2077a3 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  #4a94ef 0%,#2077a3 100%); /* IE10+ */
+background: linear-gradient(to bottom,  #4a94ef 0%,#2077a3 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4a94ef', endColorstr='#2077a3',GradientType=0 ); /* IE6-9 */
+
+}
+
+h1{
+	font-size:16px;
+	font-weight:normal;
+}
+	      	
+        </style>
+    </head>
+    <body>
+   <script>
+function validateForm() {
+    var x=document.forms["myForm"]["q"].value;
+    console.log('query string=' + x);
+    if (x==null || x=="")
+        var error = "Please enter a City or Postal Code";
+    else if(/\d/.test(x)) {
+        var regUKPostcode = /^([a-zA-Z]){1}([0-9][0-9]|[0-9]|[a-zA-Z][0-9][a-zA-Z]|[a-zA-Z][0-9][0-9]|[a-zA-Z][0-9]){1}([ ])([0-9][a-zA-z][a-zA-z]){1}$/;
+        var regUSCANZipcode = /(^\d{5}(-\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} *\d{1}[A-Z]{1}\d{1}$)/;
+        var regLatLong = /^(-?(90|(\d|[1-8]\d)(\.\d{1,6}){0,1}))\,{1}(-?(180|(\d|\d\d|1[0-7]\d)(\.\d{1,6}){0,1}))$/;
+        var validIP = function(ip) {
+            var values = ip.split('.');
+            if(values.length != 4) return false;
+
+            for(var v in values)
+                if(values[v] < 0 || values[v] > 255) return false;
+
+            return true;
+        };
+
+        if(validIP(x)) {
+            updateDom(x);
+            return false;
+        } else if(regUSCANZipcode.test(x)) {
+            updateDom(x);
+            return false;
+        } else if(regUKPostcode.test(x)) {
+            updateDom(x);
+            return false;
+        } else if(regLatLong.test(x)) {
+            updateDom(x);
+            return false;
+        } else
+            error = "Please enter a valid City or Postal Code.";
+    } else {
+        updateDom(x);
+        return false;
+    }
+
+    document.getElementById('status').innerHTML = error;
+    return false;
+};
+
+function updateDom(q) {
+    getLocalWeather(q, function(result) {
+        document.getElementById('weatherData').innerHTML = result;
+        document.getElementById('status').innerHTML = "";
+    });
+
+    return false;
+}
+
+function errorView(error) {
+    document.getElementById('status').innerHTML = error;
+}
+
+function resultView(jsonres) {
+   var template ='<div id="temp2"><h1>temp</h1><div id="temp"><%= temp %>\u2109</div></div>\
+     <div id="cond2"><h1>condition</h1><div id="cond"><%= weatherDesc %></div></div>';
+
+    var vars = 
+    {
+        location: jsonres.data.request[0].query,
+        date: jsonres.data.weather[0].date,
+        temp: jsonres.data.current_condition[0].temp_F,
+        weatherDesc: jsonres.data.current_condition[0].weatherDesc[0].value,
+        tempMaxC: jsonres.data.weather[0].tempMaxC,
+        tempMinC: jsonres.data.weather[0].tempMinC,
+        cloudcover: jsonres.data.current_condition[0].cloudcover,
+        humidity: jsonres.data.current_condition[0].humidity,
+        observation_time: jsonres.data.current_condition[0].observation_time,
+        precipMM: jsonres.data.current_condition[0].precipMM,
+        pressure: jsonres.data.current_condition[0].pressure,
+        visibility: jsonres.data.current_condition[0].visibility,
+        winddir16Point: jsonres.data.weather[0].winddir16Point,
+        winddirDegree: jsonres.data.weather[0].winddirDegree,
+        windspeed: jsonres.data.weather[0].windspeedKmph,
+        icon: jsonres.data.current_condition[0].weatherIconUrl[0].value,
+    };
+
+        return _.template(template, vars);
+}
+
+function getLocalWeather(q, onResult) {
+  var baseurl = "http://api.worldweatheronline.com/free/v1/weather.ashx";
+
+  //JSONP call
+  //Please note that 'key' here is only for demo purpose. You should replace
+  //it with your own key which can be obtained from registering on WWO website.
+  //Also you should put the key on server side on your own domain and get
+  //it using Ajax call when loading the parent html file, rather than put here
+  //at client side that everyone can see.
+  $.getJSON(baseurl + '?callback=?', {
+    q: q,
+    num_of_days: '1',
+    format: 'json',
+    key: '4emzsmye5k637enr9er4vfzf'
+  })
+  .done(function( jsonres ) {
+      console.log('getJSON'+JSON.stringify(jsonres));
+      if(jsonres.data.hasOwnProperty('error'))
+          errorView(jsonres.data.error[0].msg); 
+      else onResult(resultView(jsonres));
+  })
+  .fail(function( jqxhr, textStatus, error ) {
+        var err = textStatus + ', ' + error;
+          errorView("Request Failed: " + err);
+  });
+}
+</script>
+<div id="wrapper">
+	<div id="search">
+	<img src="image/un.png" alt="uncloud!" title="uncloud!">
+   		<form name="myForm" onsubmit="return validateForm()">
+   		<input type="text" name="q" label="Enter City Name or Postal Code Here" placeholder="City Name or Postal Code"><br>
+  		<input type="button" label="Click to Search the Weather" value="uncloud!">
+   		</form>
+   		<div style="color:#B20528"><span id="status"></span></div>
+   	</div>
+   	<div id="weatherData"></div>
+</div>
+</body></html>
